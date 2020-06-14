@@ -195,6 +195,9 @@ PublishScripts/
 *.nuget.props
 *.nuget.targets
 
+# Publishing secrets
+nuget.config
+
 # Microsoft Azure Build Output
 csx/
 *.build.csdef

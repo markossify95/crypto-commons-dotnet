@@ -5,9 +5,11 @@
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
     <PackageId>tc-crypto-commons</PackageId>
-    <Version>0.9.1</Version>
-    <Authors>marko.kostadinovic</Authors>
+    <Version>0.9.2</Version>
+    <Authors>Marko Kostadinovic</Authors>
     <Company>TradeCore Group Limited</Company>
+    <PackageDescription>Utility library which provides support for secure communication with third-party integrations. AES-256-CBC encryption/decryption. Hashing and hash validation (SHA512).</PackageDescription>
+    <RepositoryUrl>https://github.com/markossify95/crypto-commons-dotnet</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

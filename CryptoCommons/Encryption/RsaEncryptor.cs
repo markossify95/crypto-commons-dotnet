@@ -29,20 +29,37 @@ namespace CryptoCommons.Encryption
 
         }
 
+        private AsymmetricKeyParameter ReadPrivateKey(string privateKey)
+        {
+            using (var txtreader = new StringReader(privateKey))
+            {
+                var keyInstance = new PemReader(txtreader).ReadObject();
+                if (keyInstance == null)
+                    throw new FormatException("The key has an invalid PEM format.");
+                if (keyInstance is AsymmetricKeyParameter)
+                {
+                    return (AsymmetricKeyParameter)keyInstance!;
+                }
+                if (keyInstance is AsymmetricCipherKeyPair)
+                {
+                    var pair = (AsymmetricCipherKeyPair)keyInstance!;
+                    return pair!.Private;
+                }
+                throw new FormatException("The given key does not have the correct type. The keyfile must include the private and public key in PEM format. It is of type: " +
+                                      keyInstance.GetType());
+            }
+        }
+
         public string EncryptPrivate(string clearText, string privateKey)
         {
             var bytesToEncrypt = System.Text.Encoding.UTF8.GetBytes(clearText);
-
             var encryptEngine = new Pkcs1Encoding(new RsaEngine());
-
-            using (var txtreader = new StringReader(privateKey))
-            {
-                var keyPair = (AsymmetricCipherKeyPair)new PemReader(txtreader).ReadObject();
-
-                encryptEngine.Init(true, keyPair.Private);
-            }
-
-            var encrypted = Convert.ToBase64String(encryptEngine.ProcessBlock(bytesToEncrypt, 0, bytesToEncrypt.Length));
+            
+            var keyParameter = ReadPrivateKey(privateKey);
+            encryptEngine.Init(true, keyParameter);
+            
+            var encrypted = Convert.ToBase64String(
+                encryptEngine.ProcessBlock(bytesToEncrypt, 0, bytesToEncrypt.Length));
             return encrypted;
         }
 
@@ -50,16 +67,10 @@ namespace CryptoCommons.Encryption
         public string Decrypt(string base64Input, string privateKey)
         {
             var bytesToDecrypt = Convert.FromBase64String(base64Input);
-
-            AsymmetricCipherKeyPair keyPair;
             var decryptEngine = new Pkcs1Encoding(new RsaEngine());
 
-            using (var txtreader = new StringReader(privateKey))
-            {
-                keyPair = (AsymmetricCipherKeyPair)new PemReader(txtreader).ReadObject();
-
-                decryptEngine.Init(false, keyPair.Private);
-            }
+            var keyParameter = ReadPrivateKey(privateKey);
+            decryptEngine.Init(false, keyParameter);
 
             var decrypted = System.Text.Encoding.UTF8.GetString(
                 decryptEngine.ProcessBlock(bytesToDecrypt, 0, bytesToDecrypt.Length));
